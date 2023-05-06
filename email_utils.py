@@ -5,7 +5,7 @@ import regex as re
 import cohere
 import os
 
-# co = cohere.Client(os.environ['CO_API_KEY'])
+co = cohere.Client(os.environ['CO_API_KEY'])
 
 email = re.compile('[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}')
 name = re.compile('[A-Z][a-zA-Z]')
