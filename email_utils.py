@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import pandas as pd
 import requests
 import regex as re
 import cohere
@@ -7,7 +8,7 @@ import os
 co = cohere.Client(os.environ['CO_API_KEY'])
 
 email = re.compile('[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}')
-name = re.compile('^[\w\'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$')
+name = re.compile('[A-Z][a-zA-Z]')
 
 def get_emails(url):
 
@@ -21,6 +22,14 @@ def get_emails(url):
     emails = list(dict.fromkeys(emails))
 
     return emails
+
+def generate_csv(emails):
+    df = pd.DataFrame(emails, columns=["emails"]).set_index('emails')
+
+    if not os.path.isfile('emails.csv'):
+      df.to_csv('emails.csv', header='emails')
+    else: # else it exists so append without writing the header
+      df.to_csv('emails.csv', mode='a', header=False) 
 
 
 def get_research_template(prof, prof_uni, prof_topic, student_name, student_position, student_uni, student_topic):
@@ -39,16 +48,18 @@ def get_research_template(prof, prof_uni, prof_topic, student_name, student_posi
 def get_internship_template(company_employee, company_name, student_name, student_position, student_uni):
     prompt = f"Write a cold outreach email to a person named {company_employee} at {company_name} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {company_name} is interested in hiring {student_name} as an intern. Do not generate emails or phone numbers. Only ask if they are open to hiring people"
     response = co.generate(
-  model='command-xlarge-nightly',
-  prompt=prompt,
-  max_tokens=300,
-  temperature=0.5,
-  k=0,
-  stop_sequences=[],
-  return_likelihoods='NONE')
+      model='command-xlarge-nightly',
+      prompt=prompt,
+      max_tokens=300,
+      temperature=0.5,
+      k=0,
+      stop_sequences=[],
+      return_likelihoods='NONE')
 
     return response.generations[0].text
 
+
+# TODO: Fix this function
 def get_names(url):
     req = requests.get(url)
 
@@ -56,13 +67,13 @@ def get_names(url):
 
     soup = BeautifulSoup(content, features="html.parser")
 
-    names = name.findall(str(soup.find('a')))
-    names = list(dict.fromkeys(names))
-
-    return names
+    for div in soup.findAll('td'):
+      print(div.find('a').contents[0])
+      
 
 # TESTING
 
-# print(get_names(input("Please enter a url -> ")))
+print(generate_csv(get_emails(input("Please enter a url -> "))))
 # print(get_research_template("Alice Smith", "Toronto Metropolitan University", "artificial intelligence", "Bob Ross", "first year student", "Toronto Metropolitan University", "natural language processing"))
-print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
+# print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
+
