@@ -1,1 +1,1 @@
-# emailify
+# Intellimailr
