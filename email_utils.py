@@ -2,8 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import regex as re
 import cohere
+import os
 
-co = cohere.Client('')
+co = cohere.Client(os.environ['CO_API_KEY'])
 
 email = re.compile('[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}')
 name = re.compile('^[\w\'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$')
@@ -64,4 +65,4 @@ def get_names(url):
 
 # print(get_names(input("Please enter a url -> ")))
 # print(get_research_template("Alice Smith", "Toronto Metropolitan University", "artificial intelligence", "Bob Ross", "first year student", "Toronto Metropolitan University", "natural language processing"))
-# print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
+print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
