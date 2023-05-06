@@ -3,7 +3,7 @@ import requests
 import regex as re
 import cohere
 
-co = cohere.Client('GAnzo3F1hA7HnixKfwRPiMarojJC9Kwe8Wwi0bVk')
+co = cohere.Client('')
 
 email = re.compile('[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}')
 name = re.compile('^[\w\'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$')
