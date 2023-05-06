@@ -1,11 +1,12 @@
 from bs4 import BeautifulSoup
 import requests
 import regex as re
-import openai
+import cohere
 
-openai.api_key = "API KEY"
+co = cohere.Client('')
 
 email = re.compile('[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}')
+name = re.compile('^[\w\'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$')
 
 def get_emails(url):
 
@@ -20,16 +21,32 @@ def get_emails(url):
 
     return emails
 
+
 def get_research_template(prof, prof_uni, prof_topic, student_name, student_position, student_uni, student_topic):
-    completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "user", "content": f"Write a cold email to a professor named {prof} at {prof_uni} who is currently researching {prof_topic} from a student named {student_name}, who is a {student_position} at {student_uni}, asking for a position as a research assistant regarding {student_topic}"}
-    ]
-    )
+    response = co.generate(
+  model='command-xlarge-nightly',
+  prompt=f"Write a cold outreach email to a professor named {prof} at {prof_uni} who is currently researching {prof_topic} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {prof} is interested in hiring {student_name} as a research assistant regarding {student_topic}. Do not generate emails or phone numbers. Only ask if they are open to hiring people"
+,
+  max_tokens=300,
+  temperature=0.9,
+  k=0,
+  stop_sequences=[],
+  return_likelihoods='NONE')
 
-    return completion.choices[0].message.content
+    return response.generations[0].text
 
-print(get_emails(input("Please enter a url -> ")))
+def get_names(url):
+    req = requests.get(url)
 
-print(get_research_template("Ashton Anderson", "University of Toronto", "Artificial intelligence", "Robert Jordan", "first year student", "University of Waterloo", "Image classification"))
+    content = req.text
+
+    soup = BeautifulSoup(content, features="html.parser")
+
+    names = name.findall(str(soup.find('a')))
+    names = list(dict.fromkeys(names))
+
+    return names
+
+# print(get_names(input("Please enter a url -> ")))
+
+print(get_research_template("Alice Smith", "Toronto Metropolitan University", "artificial intelligence", "Bob Ross", "first year student", "Toronto Metropolitan University", "natural language processing"))
