@@ -20,18 +20,31 @@ def get_emails(url):
 
     emails = email.findall(str(soup.find('main')))
     emails = list(dict.fromkeys(emails))
+    emails.remove("arvind@cs.toronto.edu")
+    emails.remove("rahulgk@cs.toronto.edu")
+    emails.remove("sam@cs.toronto.edu")
+    emails.remove("ningningxie@cs.toronto.edu")
+    emails.remove("sharmin@cs.toronto.edu")
+    emails.remove("sunk@cs.toronto.edu")
+    emails.remove("swastik@cs.toronto.edu")
+    emails.remove("nawiebe@cs.toronto.edu")
 
     return emails
 
-def generate_csv(emails):
+def read_emails(filepath):
+   df = pd.read_csv(filepath)
+
+   return df.to_json()
+
+def generate_csv(names, emails):
     size = len(emails)
     status = ["Not Applied" for i in range(size)]
     contacted = ["No" for i in range(size)]
-    recruiters = { "emails": emails, "status": status, "contacted": contacted }
+    recruiters = { "names" : names, "emails": emails, "status": status, "contacted": contacted }
     
-    df = pd.DataFrame(recruiters, columns=["emails", "status", "contacted"]).set_index('emails')
+    df = pd.DataFrame(recruiters, columns=["names", "emails", "status", "contacted"]).set_index('names')
     if not os.path.isfile('recruiters.csv'):
-      df.to_csv('recruiters.csv', header=['status', "contacted"])
+      df.to_csv('recruiters.csv', header=['emails', 'status', 'contacted'])
     else: # else it exists so append without writing the header
       df.to_csv('recruiters.csv', mode='a', header=False) 
 
@@ -87,7 +100,16 @@ def get_names(url):
 
 # TESTING
 
-print(get_names(input("Enter url > ")))
+url = "https://web.cs.toronto.edu/people/faculty-directory"
+
+names = get_names(url)
+emails = get_emails(url)
+
+names = names[:len(emails)]
+
+print(read_emails("recruiters.csv"))
+
+
       
 # print(get_research_template("Alice Smith", "Toronto Metropolitan University", "artificial intelligence", "Bob Ross", "first year student", "Toronto Metropolitan University", "natural language processing"))
 # print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
