@@ -71,13 +71,23 @@ def get_names(url):
 
     soup = BeautifulSoup(content, features="html.parser")
 
+    names = []
+
     for div in soup.findAll('td'):
-      print(div.find('a').contents[0])
+      try:
+        names.append(div.find('a').contents[0])
+      except:
+        continue
+
+    names = [i for i in names if not email.match(i)]
+
+    return names
+    
       
 
 # TESTING
 
-print(generate_csv(get_emails(input("Please enter a url -> "))))
+print(get_names(input("Enter url > ")))
       
 # print(get_research_template("Alice Smith", "Toronto Metropolitan University", "artificial intelligence", "Bob Ross", "first year student", "Toronto Metropolitan University", "natural language processing"))
 # print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
