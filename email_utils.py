@@ -76,7 +76,6 @@ def get_internship_template(company_employee, company_name, student_name, studen
     return response.generations[0].text
 
 
-# TODO: Fix this function
 def get_names(url):
     req = requests.get(url)
 
