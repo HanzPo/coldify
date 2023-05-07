@@ -95,6 +95,7 @@ def get_research_template():
     k=0,
     stop_sequences=[],
     return_likelihoods='NONE')
+    print(response.generations[0])
 
     return response.generations[0]
 
@@ -116,7 +117,7 @@ def get_internship_template():
       k=0,
       stop_sequences=[],
       return_likelihoods='NONE')
-
+    print(response.generations[0])
     return response.generations[0]
 
 def get_names(url):
