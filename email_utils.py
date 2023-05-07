@@ -6,9 +6,10 @@ import cohere
 import os
 import json
 from flask import Flask, jsonify, request, Response
+from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 
-co = cohere.Client(os.environ['CO_API_KEY'])
+# co = cohere.Client(os.environ['CO_API_KEY'])
 
 email = re.compile('[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}')
 name = re.compile('[A-Z][a-zA-Z]')
@@ -76,7 +77,9 @@ def getPlotCSV():
 
 
 @app.route("/api/v1/research", methods=["POST"])
+@cross_origin()
 def get_research_template():
+    print(request.data)
     data = json.loads(request.data)
     student_name = data['student_name']
     student_field = data['student_field']
@@ -96,6 +99,7 @@ def get_research_template():
     return response.generations[0]
 
 @app.route("/api/v1/internship", methods=["POST"])
+@cross_origin()
 def get_internship_template():
     data = json.loads(request.data)
     student_name = data['student_name']
@@ -134,5 +138,5 @@ def get_names(url):
 
     return jsonify(names)
     
-app.run(debug=True)
+app.run(debug=True, port=5000)
 
