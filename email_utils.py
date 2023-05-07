@@ -85,7 +85,7 @@ def get_research_template():
     student_position = data['student_position']
     student_uni = data['student_uni']
     student_topic = data['student_topic']
-    prompt = f"Write a cold outreach email to a professor named {prof} at {prof_uni} who is currently researching {prof_topic} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {prof} is interested in hiring {student_name} as a research assistant regarding {student_topic}. Do not generate emails or phone numbers. Only ask if they are open to hiring people"
+    prompt = f"Write a cold outreach email to a professor named {prof} at {prof_uni} who is currently researching {prof_topic} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {prof} is interested in hiring {student_name} as a research assistant regarding {student_topic}. Do not generate emails or phone numbers. Only ask if they are open to hiring people."
     response = co.generate(
     model='command-xlarge-nightly',
     prompt=prompt,
@@ -100,12 +100,12 @@ def get_research_template():
 @app.route("/api/v1/internship", methods=["POST"])
 def get_internship_template():
     data = json.loads(request.data)
-    company_employee = data['company_employee']
-    company_name = data['company_name']
     student_name = data['student_name']
-    student_position = data['student_position']
+    student_field = data['student_field']
+    student_experience = data['student_experience']
     student_uni = data['student_uni']
-    prompt = f"Write a cold outreach email to a person named {company_employee} at {company_name} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {company_name} is interested in hiring {student_name} as an intern. Do not generate emails or phone numbers. Only ask if they are open to hiring people"
+    company_name = data['company_name']
+    prompt = f"Write an outreach cold email written by a student named {student_name} interested in working in the field of {student_field}. The person is a {student_experience} at {student_uni}, and is asking about an internship at a company called {company_name}. Do not generate emails or phone numbers. Only ask if they are open to hiring people."
     response = co.generate(
       model='command-xlarge-nightly',
       prompt=prompt,
@@ -117,8 +117,6 @@ def get_internship_template():
 
     return response.generations[0]
 
-
-# TODO: Fix this function
 def get_names(url):
     req = requests.get(url)
 
