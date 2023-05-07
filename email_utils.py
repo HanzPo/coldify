@@ -79,7 +79,6 @@ def getPlotCSV():
 @app.route("/api/v1/research", methods=["POST"])
 @cross_origin()
 def get_research_template():
-    print(request.data)
     data = json.loads(request.data)
     student_name = data['student_name']
     student_field = data['student_field']
@@ -95,9 +94,7 @@ def get_research_template():
     k=0,
     stop_sequences=[],
     return_likelihoods='NONE')
-    print(response.generations[0])
-
-    return response.generations[0]
+    return jsonify({ "text": response.generations[0]})
 
 @app.route("/api/v1/internship", methods=["POST"])
 @cross_origin()
@@ -117,8 +114,7 @@ def get_internship_template():
       k=0,
       stop_sequences=[],
       return_likelihoods='NONE')
-    print(response.generations[0])
-    return response.generations[0]
+    return jsonify({ "text": response.generations[0] })
 
 def get_names(url):
     req = requests.get(url)
@@ -139,5 +135,5 @@ def get_names(url):
 
     return jsonify(names)
     
-app.run(debug=True, port=5000)
+app.run(debug=False)
 

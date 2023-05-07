@@ -166,12 +166,13 @@
           </nav>
           <div class="container">
             <h1>Cold Email Template</h1>
-            <div class="result card mt-5 fs-1">Write an outreach cold email written by a student named {student_name} interested in working in the field of {student_field}. The person is a {student_experience} at {student_uni}, and is asking about an internship at a company called {company_name}. Do not generate emails or phone numbers. Only ask if they are open to hiring people.</div>
+            <div class="result card mt-5 fs-1"></div>
           </div>
       `;
       document.body.innerHTML = content;
-      data = await response.json()
-      document.getElementsByClassName("result")[0].innerHTML = data
+      data = await response.json()  
+      document.getElementsByClassName("result")[0].innerHTML = data.text  
+        
       });
   </script>
 </html>
