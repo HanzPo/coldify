@@ -78,14 +78,12 @@ def getPlotCSV():
 @app.route("/api/v1/research", methods=["POST"])
 def get_research_template():
     data = json.loads(request.data)
-    prof = data['prof']
-    prof_uni = data['prof_uni']
-    prof_topic = data['prof_topic']
     student_name = data['student_name']
-    student_position = data['student_position']
+    student_field = data['student_field']
+    student_experience = data['student_experience']
     student_uni = data['student_uni']
-    student_topic = data['student_topic']
-    prompt = f"Write a cold outreach email to a professor named {prof} at {prof_uni} who is currently researching {prof_topic} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {prof} is interested in hiring {student_name} as a research assistant regarding {student_topic}. Do not generate emails or phone numbers. Only ask if they are open to hiring people."
+    prof_name = data['prof_name']
+    prompt = f"Write a cold outreach email to a professor named {prof_name} from a student named {student_name}, who is a {student_experience} at {student_uni}, asking if {prof_name} is interested in hiring {student_name} as a research assistant regarding {student_field}. Do not generate emails or phone numbers. Only ask if they are open to hiring people."
     response = co.generate(
     model='command-xlarge-nightly',
     prompt=prompt,
