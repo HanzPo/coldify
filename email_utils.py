@@ -5,7 +5,7 @@ import regex as re
 import cohere
 import os
 import json
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 app = Flask(__name__)
 
 co = cohere.Client(os.environ['CO_API_KEY'])
@@ -41,12 +41,15 @@ def get_emails():
 
     return jsonify(emails)
 
-def read_emails(filepath):
-   df = pd.read_csv(filepath)
-
-   return df.to_json()
-
-def generate_csv(names, emails):
+@app.route("/api/v1/csv", methods=["POST"])
+def generate_csv():
+    data = json.loads(request.data) 
+    names = data['names']
+    emails = data['emails']
+    if (not type(names) is list):
+       return "Invalid names"
+    if (not type(emails) is list):
+       return "Invalid emails"
     size = len(emails)
     status = ["Not Applied" for i in range(size)]
     contacted = ["No" for i in range(size)]
@@ -56,7 +59,21 @@ def generate_csv(names, emails):
     if not os.path.isfile('recruiters.csv'):
       df.to_csv('recruiters.csv', header=['emails', 'status', 'contacted'])
     else: # else it exists so append without writing the header
-      df.to_csv('recruiters.csv', mode='a', header=False) 
+      pass
+      # df.to_csv('recruiters.csv', mode='a', header=False)
+
+@app.route("/api/v1/csv") 
+def getPlotCSV():
+    if not os.path.isfile('recruiters.csv'):
+        return None
+    df = pd.read_csv('recruiters.csv')
+    csv = df.to_csv()[1:]
+    return Response(
+        csv,
+        mimetype="text/csv",
+        headers={"Content-disposition":
+                 "attachment; filename=myplot.csv"})
+
 
 @app.route("/api/v1/research", methods=["POST"])
 def get_research_template():
@@ -129,21 +146,5 @@ def get_names():
 
     return jsonify(names)
     
-app.run(debug=True)      
-
-# TESTING
-
-# url = "https://web.cs.toronto.edu/people/faculty-directory"
-
-# names = get_names(url)
-# emails = get_emails(url)
-
-# names = names[:len(emails)]
-
-# print(read_emails("recruiters.csv"))
-
-
-      
-# print(get_research_template("Alice Smith", "Toronto Metropolitan University", "artificial intelligence", "Bob Ross", "first year student", "Toronto Metropolitan University", "natural language processing"))
-# print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
+app.run(debug=True)
 
