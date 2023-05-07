@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@500&family=PT+Mono&family=Sigmar&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@600&display=swap');
 
 body {
     margin: auto;
@@ -22,7 +22,8 @@ body {
 }
 
 h1 {
-    font-family: "PT Mono", monospace;
+    font-family: 'Titillium Web', sans-serif;
+    font-size: 70px;
     text-align: center;
 }
 
