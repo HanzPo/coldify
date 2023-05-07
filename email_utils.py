@@ -4,14 +4,24 @@ import requests
 import regex as re
 import cohere
 import os
+import json
+from flask import Flask, jsonify, request, Response
+app = Flask(__name__)
 
 co = cohere.Client(os.environ['CO_API_KEY'])
 
 email = re.compile('[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}')
 name = re.compile('[A-Z][a-zA-Z]')
 
-def get_emails(url):
-
+@app.route("/api/v1/emails", methods=["POST"])
+def get_emails():
+    data = json.loads(request.data)
+    url_format = re.compile("((http|https)://)(www.)?[a-zA-Z0-9@:%._\\+~#?&//=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%._\\+~#?&//=]*)")
+    if not "url" in data:
+      return "Invalid json data format"
+    url = data['url']
+    if not url_format.match(url):
+      return "Invalid URL"
     req = requests.get(url)
 
     content = req.text
@@ -29,14 +39,17 @@ def get_emails(url):
     emails.remove("swastik@cs.toronto.edu")
     emails.remove("nawiebe@cs.toronto.edu")
 
-    return emails
+    return jsonify(emails)
 
-def read_emails(filepath):
-   df = pd.read_csv(filepath)
-
-   return df.to_json()
-
-def generate_csv(names, emails):
+@app.route("/api/v1/csv", methods=["POST"])
+def generate_csv():
+    data = json.loads(request.data) 
+    names = data['names']
+    emails = data['emails']
+    if (not type(names) is list):
+       return "Invalid names"
+    if (not type(emails) is list):
+       return "Invalid emails"
     size = len(emails)
     status = ["Not Applied" for i in range(size)]
     contacted = ["No" for i in range(size)]
@@ -46,10 +59,32 @@ def generate_csv(names, emails):
     if not os.path.isfile('recruiters.csv'):
       df.to_csv('recruiters.csv', header=['emails', 'status', 'contacted'])
     else: # else it exists so append without writing the header
-      df.to_csv('recruiters.csv', mode='a', header=False) 
+      pass
+      # df.to_csv('recruiters.csv', mode='a', header=False)
+
+@app.route("/api/v1/csv") 
+def getPlotCSV():
+    if not os.path.isfile('recruiters.csv'):
+        return None
+    df = pd.read_csv('recruiters.csv')
+    csv = df.to_csv()[1:]
+    return Response(
+        csv,
+        mimetype="text/csv",
+        headers={"Content-disposition":
+                 "attachment; filename=myplot.csv"})
 
 
-def get_research_template(prof, prof_uni, prof_topic, student_name, student_position, student_uni, student_topic):
+@app.route("/api/v1/research", methods=["POST"])
+def get_research_template():
+    data = json.loads(request.data)
+    prof = data['prof']
+    prof_uni = data['prof_uni']
+    prof_topic = data['prof_topic']
+    student_name = data['student_name']
+    student_position = data['student_position']
+    student_uni = data['student_uni']
+    student_topic = data['student_topic']
     prompt = f"Write a cold outreach email to a professor named {prof} at {prof_uni} who is currently researching {prof_topic} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {prof} is interested in hiring {student_name} as a research assistant regarding {student_topic}. Do not generate emails or phone numbers. Only ask if they are open to hiring people"
     response = co.generate(
     model='command-xlarge-nightly',
@@ -60,9 +95,16 @@ def get_research_template(prof, prof_uni, prof_topic, student_name, student_posi
     stop_sequences=[],
     return_likelihoods='NONE')
 
-    return response.generations[0].text
+    return response.generations[0]
 
-def get_internship_template(company_employee, company_name, student_name, student_position, student_uni):
+@app.route("/api/v1/internship", methods=["POST"])
+def get_internship_template():
+    data = json.loads(request.data)
+    company_employee = data['company_employee']
+    company_name = data['company_name']
+    student_name = data['student_name']
+    student_position = data['student_position']
+    student_uni = data['student_uni']
     prompt = f"Write a cold outreach email to a person named {company_employee} at {company_name} from a student named {student_name}, who is a {student_position} at {student_uni}, asking if {company_name} is interested in hiring {student_name} as an intern. Do not generate emails or phone numbers. Only ask if they are open to hiring people"
     response = co.generate(
       model='command-xlarge-nightly',
@@ -73,9 +115,10 @@ def get_internship_template(company_employee, company_name, student_name, studen
       stop_sequences=[],
       return_likelihoods='NONE')
 
-    return response.generations[0].text
+    return response.generations[0]
 
 
+# TODO: Fix this function
 def get_names(url):
     req = requests.get(url)
 
@@ -93,23 +136,7 @@ def get_names(url):
 
     names = [i for i in names if not email.match(i)]
 
-    return names
+    return jsonify(names)
     
-      
-
-# TESTING
-
-url = "https://web.cs.toronto.edu/people/faculty-directory"
-
-names = get_names(url)
-emails = get_emails(url)
-
-names = names[:len(emails)]
-
-print(read_emails("recruiters.csv"))
-
-
-      
-# print(get_research_template("Alice Smith", "Toronto Metropolitan University", "artificial intelligence", "Bob Ross", "first year student", "Toronto Metropolitan University", "natural language processing"))
-# print(get_internship_template("Alice Smith", "Cohere", "Bob Ross", "first year Computer Science student", "Toronto Metropolitan University"))
+app.run(debug=True)
 
