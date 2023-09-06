@@ -31,14 +31,6 @@ def get_emails():
 
     emails = email.findall(str(soup.find('main')))
     emails = list(dict.fromkeys(emails))
-    emails.remove("arvind@cs.toronto.edu")
-    emails.remove("rahulgk@cs.toronto.edu")
-    emails.remove("sam@cs.toronto.edu")
-    emails.remove("ningningxie@cs.toronto.edu")
-    emails.remove("sharmin@cs.toronto.edu")
-    emails.remove("sunk@cs.toronto.edu")
-    emails.remove("swastik@cs.toronto.edu")
-    emails.remove("nawiebe@cs.toronto.edu")
 
     return jsonify(emails)
 
